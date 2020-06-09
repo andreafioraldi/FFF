@@ -9,7 +9,11 @@
 
 #include "Config.h"
 
+#include "argparse.h"
+#include <iostream>
+
 using namespace FFF;
+using namespace argparse;
 
 extern "C" {
 
@@ -22,6 +26,21 @@ __attribute__((weak)) int LLVMFuzzerInitialize(int *argc, char ***argv);
 }
 
 int main(int argc, char** argv) {
+
+  ArgumentParser cmd("libFuzzer-FFF", "libFuzzer-FFF");
+  cmd.add_argument("-i", "--input", "Input corpus directory", false);
+  cmd.add_argument("-o", "--output", "Output corpus directory", true);
+  cmd.enable_help();
+  auto err = cmd.parse(argc, (const char**)argv);
+  if (err) {
+    std::cerr << err << std::endl;
+    return -1;
+  }
+
+  if (cmd.exists("help")) {
+    cmd.print_help();
+    return 0;
+  }
 
   Engine engine;
 
@@ -38,6 +57,7 @@ int main(int argc, char** argv) {
   exe.addObserver(&cmp_obs);
   
   GlobalQueue queue;
+  queue.addFeedbackQueue(&cmp_queue);
   MutationalFuzzOne fuzz_one(&engine, &queue);
   Stage havoc(&engine);
   HavocMutator havoc_mut;
@@ -52,7 +72,11 @@ int main(int argc, char** argv) {
   
   if (LLVMFuzzerInitialize) LLVMFuzzerInitialize(&argc, &argv);
   
-  engine.loadZeroTestcase(4);
+  if (!cmd.exists("i"))
+    engine.loadZeroTestcase(4);
+  else
+    engine.loadTestcasesFromDir(cmd.get<std::string>("input"));
+  
   engine.loop();
 
 }

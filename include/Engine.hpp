@@ -25,32 +25,14 @@ struct Engine {
     feedbacks.push_back(feedback);
   }
 
-  void execute(VirtualInput* input) {
-    executor->resetObservers();
-    executor->placeInput(input);
-    executor->runTarget();
-    for (auto obs : executor->getObservers())
-      obs->postExec(executor);
-    
-    bool add_to_queue = false;
-    for(auto feedback : feedbacks)
-      add_to_queue = add_to_queue || feedback->isInteresting(executor);
-    if (add_to_queue)
-      queue->add(new QueueEntry(input, true));
-  }
-
+  void execute(VirtualInput* input);
   void loop() {
     while (true)
       fuzz_one->perform();
   }
   
-  void loadTestcasesFromDir(const std::string& path) {
-    //TODO
-  }
-  void loadZeroTestcase(size_t size) {
-    RawInput* zero = new RawInput(Bytes(size, 0));
-    execute(zero);
-  }
+  void loadTestcasesFromDir(const std::string& path);
+  void loadZeroTestcase(size_t size);
 
 protected:
   FuzzOne* fuzz_one;

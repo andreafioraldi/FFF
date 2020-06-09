@@ -15,10 +15,10 @@ struct InMemoryExecutor : Executor {
 
   void runTarget() {
     if (currentInput->alreadySerialized()) {
-      harnessFunction(currentInput->raw().data(), currentInput->raw().size());
+      harnessFunction((const uint8_t*)currentInput->raw().data(), currentInput->raw().size());
     } else {
       Bytes bytes = currentInput->serialize();
-      harnessFunction(bytes.data(), bytes.size());
+      harnessFunction((const uint8_t*)bytes.data(), bytes.size());
     }
   }
 

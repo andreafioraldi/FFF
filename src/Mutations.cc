@@ -153,6 +153,7 @@ void DeleteBytesMutation(VirtualInput* input) {
 void CloneBytesMutation(VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
+  if (!size) return;
   int actually_clone = Random::below(4);
   size_t clone_from, clone_to, clone_len;
   clone_to = Random::below(size);
@@ -170,6 +171,7 @@ void CloneBytesMutation(VirtualInput* input) {
 void OverwriteBytesMutation(VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
+  if (!size) return;
   int actually_clone = Random::below(4);
   size_t clone_from, clone_to, clone_len;
   clone_to = Random::below(size);

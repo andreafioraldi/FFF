@@ -53,7 +53,7 @@ struct HitcountsMapObvservationChannel : MapObvservationChannel<uint8_t> {
       traceBits[i] = countClassLookup[traceBits[i]];
     }
   }
-  
+
 };
 
 struct CmpMapObvservationChannel : MapObvservationChannel<uint8_t> {
