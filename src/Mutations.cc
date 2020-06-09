@@ -196,6 +196,11 @@ void addHavocMutations(ScheduledMutator* mut) {
   mut->addMutation(&RandomWordAddSubMutation);
   mut->addMutation(&RandomDwordAddSubMutation);
   mut->addMutation(&RandomByteMutation);
+  mut->addMutation(&RandomByteMutation);
+  mut->addMutation(&RandomByteMutation);
+  mut->addMutation(&RandomByteMutation);
+  mut->addMutation(&RandomByteMutation);
+  
   mut->addMutation(&DeleteBytesMutation);
   mut->addMutation(&DeleteBytesMutation); // delete is 2 times more likely
   mut->addMutation(&CloneBytesMutation);

@@ -5,8 +5,7 @@
 #include "FuzzOne.hpp"
 #include "Impl/InMemoryExecutor.hpp"
 #include "Impl/MaximizeMapFeedback.hpp"
-#include "Impl/HitcountsMapObvservationChannel.hpp"
-#include "Impl/CmpMapObvservationChannel.hpp"
+#include "Impl/MapObvservationChannel.hpp"
 
 #include "Config.h"
 
@@ -29,12 +28,12 @@ int main(int argc, char** argv) {
   InMemoryExecutor exe(&LLVMFuzzerTestOneInput);
   
   HitcountsMapObvservationChannel hits_obs(__fff_edges_map, MAP_SIZE);
-  MaximizeMapFeedback<uint8_t> hits_feed(MAP_SIZE);
+  MaximizeMapFeedback<uint8_t, HitcountsMapObvservationChannel> hits_feed(MAP_SIZE);
   exe.addObserver(&hits_obs);
   
   CmpMapObvservationChannel cmp_obs(__fff_cmp_map, MAP_SIZE);
-  MaximizeMapFeedback<uint8_t> cmp_feed(MAP_SIZE);
-  FeedbackQueue cmp_queue(&cmp_feed);
+  MaximizeMapFeedback<uint8_t, CmpMapObvservationChannel> cmp_feed(MAP_SIZE);
+  FeedbackQueue cmp_queue(&cmp_feed, "CmpQueue");
   cmp_feed.setFeedbackQueue(&cmp_queue);
   exe.addObserver(&cmp_obs);
   
@@ -53,7 +52,7 @@ int main(int argc, char** argv) {
   
   if (LLVMFuzzerInitialize) LLVMFuzzerInitialize(&argc, &argv);
   
-  engine.loadZeroTestcase(32);
+  engine.loadZeroTestcase(4);
   engine.loop();
 
 }

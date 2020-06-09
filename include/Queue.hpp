@@ -2,10 +2,12 @@
 
 #include "VirtualInput.hpp"
 #include "Random.hpp"
+#include "Logger.hpp"
 
 #include <vector>
 #include <map>
-#include <iostream>
+#include <string>
+
 namespace FFF {
 
 struct Engine;
@@ -64,13 +66,21 @@ protected:
 
 struct AbstractQueue {
 
+  virtual const char* getQueueName() {
+    return "AbstractQueue";
+  }
+
   virtual void add(QueueEntry* entry) {
     entry->next = base;
     if (base) base->prev = entry;
     base = entry;
     size++;
+    // TODO proper logging
+    std::cerr << getQueueName() << " ADD: size = " << size << "\n";
   }
-  virtual void remove(QueueEntry* entry) {}
+  virtual void remove(QueueEntry* entry) {
+    // TODO
+  }
   virtual QueueEntry* get(Engine* engine) {
     size--;
     return currents[engine];
@@ -98,16 +108,29 @@ protected:
 
 struct FeedbackQueue : public AbstractQueue {
 
+  virtual const char* getQueueName() {
+    return name;
+  }
+
   FeedbackQueue(Feedback* feedback) {
     this->feedback = feedback;
+  }
+  FeedbackQueue(Feedback* feedback, const char* name) {
+    this->feedback = feedback;
+    this->name = name;
   }
   
 protected:
   Feedback* feedback;
+  const char* name = "FeedbackQueue";
 
 };
 
 struct GlobalQueue : public AbstractQueue {
+
+  virtual const char* getQueueName() {
+    return "GlobalQueue";
+  }
 
   QueueEntry* get(Engine* engine) {
     if (currentsQueues[engine] != nullptr)

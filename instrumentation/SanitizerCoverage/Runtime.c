@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint8_t __fff_edges_map[MAP_SIZE];
 uint8_t __fff_cmp_map[MAP_SIZE];
 
@@ -72,3 +76,26 @@ void __sanitizer_cov_trace_cmp8(uint64_t arg1, uint64_t arg2) {
   k &= MAP_SIZE - 1;
   __fff_cmp_map[k] = MAX(__fff_cmp_map[k], (__builtin_popcountll(~(arg1 ^ arg2))));
 }
+
+void __sanitizer_cov_trace_switch(uint64_t val, uint64_t* cases) {
+  uintptr_t rt = (uintptr_t)__builtin_return_address(0);
+  if (cases[1] == 64) {
+    for (uint64_t i = 0; i < cases[0]; i++) {
+      uintptr_t k = rt + i;
+      k = (k >> 4) ^ (k << 8);
+      k &= MAP_SIZE - 1;
+      __fff_cmp_map[k] = MAX(__fff_cmp_map[k], (__builtin_popcountll(~(val ^ cases[i + 2]))));
+    }
+  } else {
+    for (uint64_t i = 0; i < cases[0]; i++) {
+      uintptr_t k = rt + i;
+      k = (k >> 4) ^ (k << 8);
+      k &= MAP_SIZE - 1;
+      __fff_cmp_map[k] = MAX(__fff_cmp_map[k], (__builtin_popcount(~(val ^ cases[i + 2]))));
+    }
+  }
+}
+
+#ifdef __cplusplus
+}
+#endif

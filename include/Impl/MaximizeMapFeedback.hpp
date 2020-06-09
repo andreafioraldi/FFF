@@ -1,14 +1,17 @@
 #pragma once
 
 #include "Feedback.hpp"
-#include "HitcountsMapObvservationChannel.hpp"
+#include "MapObvservationChannel.hpp"
+
+#include <type_traits>
 
 namespace FFF {
 
-template<class BaseType>
+template<class BaseType, class ObserverType>
 struct MaximizeMapFeedback : Feedback {
 
   MaximizeMapFeedback(size_t size) {
+    // static_assert(std::is_base_of<MapObvservationChannel, ObserverType>::value, "ObserverType must derive from MapObvservationChannel");
     this->size = size;
     virginBits = new BaseType[size]();
   }
@@ -22,7 +25,7 @@ struct MaximizeMapFeedback : Feedback {
     bool found = false;
 
     for (auto ob : executor->getObservers()) {
-      if (auto hmob = dynamic_cast<HitcountsMapObvservationChannel*>(ob)) {
+      if (auto hmob = dynamic_cast<ObserverType*>(ob)) {
       
         if (size != hmob->getSize()) continue;
       
