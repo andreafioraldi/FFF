@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Feedback.hpp"
-#include "MapObvservationChannel.hpp"
+#include "Feedback/Feedback.hpp"
+#include "Observation/MapObservationChannel.hpp"
 
 #include <type_traits>
 
@@ -11,7 +11,7 @@ template<class BaseType, class ObserverType>
 struct MaximizeMapFeedback : Feedback {
 
   MaximizeMapFeedback(size_t size) {
-    // static_assert(std::is_base_of<MapObvservationChannel, ObserverType>::value, "ObserverType must derive from MapObvservationChannel");
+    // static_assert(std::is_base_of<MapObservationChannel, ObserverType>::value, "ObserverType must derive from MapObservationChannel");
     this->size = size;
     virginBits = new BaseType[size]();
   }

@@ -4,7 +4,7 @@ namespace FFF {
 
 struct Executor;
 
-struct ObvservationChannel {
+struct ObservationChannel {
 
   void flush() {};
   virtual void reset() = 0;

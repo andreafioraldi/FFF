@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VirtualInput.hpp"
-#include "ObservationChannel.hpp"
+#include "Input/VirtualInput.hpp"
+#include "Observation/ObservationChannel.hpp"
 
 #include <vector>
 
@@ -19,10 +19,10 @@ struct Executor {
       obv->reset();
   }
 
-  std::vector<ObvservationChannel*>& getObservers() {
+  std::vector<ObservationChannel*>& getObservers() {
     return observers;
   }
-  void addObserver(ObvservationChannel* obs) {
+  void addObserver(ObservationChannel* obs) {
     observers.push_back(obs);
   }
   VirtualInput* getCurrentInput() {
@@ -30,7 +30,7 @@ struct Executor {
   }
 
 protected:
-  std::vector<ObvservationChannel*> observers;
+  std::vector<ObservationChannel*> observers;
   VirtualInput* currentInput;
 
 };

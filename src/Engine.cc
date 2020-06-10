@@ -2,6 +2,7 @@
 #include "Logger.hpp"
 
 #include <filesystem>
+#include <fstream>
 
 using namespace FFF;
 

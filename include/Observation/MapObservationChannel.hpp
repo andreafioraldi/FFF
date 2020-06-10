@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ObservationChannel.hpp"
+#include "Observation/ObservationChannel.hpp"
 #include <cstring>
 
 namespace FFF {
 
 template<typename BaseType>
-struct MapObvservationChannel : ObvservationChannel {
+struct MapObservationChannel : ObservationChannel {
 
-  MapObvservationChannel(BaseType* traceBits, size_t size) {
+  MapObservationChannel(BaseType* traceBits, size_t size) {
     this->traceBits = traceBits;
     this->size = size;
   }
@@ -30,9 +30,9 @@ protected:
 
 };
 
-struct HitcountsMapObvservationChannel : MapObvservationChannel<uint8_t> {
+struct HitcountsMapObservationChannel : MapObservationChannel<uint8_t> {
 
-  using MapObvservationChannel<uint8_t>::MapObvservationChannel;
+  using MapObservationChannel<uint8_t>::MapObservationChannel;
 
   void postExec(Executor* executor) {
     static constexpr uint8_t countClassLookup[256] = {
@@ -56,9 +56,9 @@ struct HitcountsMapObvservationChannel : MapObvservationChannel<uint8_t> {
 
 };
 
-struct CmpMapObvservationChannel : MapObvservationChannel<uint8_t> {
+struct CmpMapObservationChannel : MapObservationChannel<uint8_t> {
 
-  using MapObvservationChannel<uint8_t>::MapObvservationChannel;
+  using MapObservationChannel<uint8_t>::MapObservationChannel;
 
 };
 

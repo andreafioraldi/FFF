@@ -1,8 +1,10 @@
 #pragma once
 
-#include "VirtualInput.hpp"
-#include "Feedback.hpp"
-#include "FuzzOne.hpp"
+#include "Input/VirtualInput.hpp"
+#include "Feedback/Feedback.hpp"
+#include "FuzzOne/FuzzOne.hpp"
+#include "Queue/GlobalQueue.hpp"
+#include "FuzzOne/FuzzOne.hpp"
 #include "Random.hpp"
 
 #include <vector>

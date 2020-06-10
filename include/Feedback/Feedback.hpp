@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Executor.hpp"
-#include "Queue.hpp"
+#include "Executor/Executor.hpp"
+#include "Queue/FeedbackQueue.hpp"
 
 namespace FFF {
 

@@ -1,23 +1,20 @@
 #pragma once
 
-#include "VirtualInput.hpp"
+#include "Stage/Stage.hpp"
 #include "Random.hpp"
 
 #include <vector>
 
 namespace FFF {
 
-struct Engine;
 struct Mutator;
 
-struct Stage {
+struct FuzzingStage : Stage {
 
-  Stage(Engine* engine) {
-    this->engine = engine;
-  }
+  using Stage::Stage;
 
   virtual size_t iterations() {
-    return 42;
+    return Random::below(128);
   }
 
   void perform(VirtualInput* input);
@@ -27,7 +24,6 @@ struct Stage {
   }
 
 protected:
-  Engine* engine;
   std::vector<Mutator*> mutators;
 
 };

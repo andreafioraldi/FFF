@@ -1,4 +1,4 @@
-#include "Mutator.hpp"
+#include "Mutator/ScheduledMutator.hpp"
 #include "Random.hpp"
 
 #define ARITH_MAX 35
@@ -197,6 +197,7 @@ void addHavocMutations(ScheduledMutator* mut) {
   mut->addMutation(&RandomByteAddSubMutation);
   mut->addMutation(&RandomWordAddSubMutation);
   mut->addMutation(&RandomDwordAddSubMutation);
+
   mut->addMutation(&RandomByteMutation);
   mut->addMutation(&RandomByteMutation);
   mut->addMutation(&RandomByteMutation);

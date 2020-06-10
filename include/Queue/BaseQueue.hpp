@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VirtualInput.hpp"
+#include "Input/VirtualInput.hpp"
 #include "Random.hpp"
 #include "Logger.hpp"
 
@@ -16,7 +16,7 @@ struct FeedbackMetadata;
 
 struct QueueEntry {
 
-  friend class AbstractQueue;
+  friend class BaseQueue;
 
   QueueEntry(VirtualInput* input) {
     this->input = input;
@@ -64,10 +64,10 @@ protected:
 
 };
 
-struct AbstractQueue {
+struct BaseQueue {
 
   virtual const char* getQueueName() {
-    return "AbstractQueue";
+    return "BaseQueue";
   }
 
   virtual void add(QueueEntry* entry) {
@@ -75,8 +75,7 @@ struct AbstractQueue {
     if (base) base->prev = entry;
     base = entry;
     size++;
-    // TODO proper logging
-    std::cerr << getQueueName() << " ADD: size = " << size << "\n";
+    Logger::log(getQueueName(), " ADD: size = ", size, "\n");
   }
   virtual void remove(QueueEntry* entry) {
     // TODO
@@ -103,66 +102,6 @@ protected:
   QueueEntry* base = nullptr;
   size_t size = 0;
   std::map<Engine*, QueueEntry*> currents;
-
-};
-
-struct FeedbackQueue : public AbstractQueue {
-
-  virtual const char* getQueueName() {
-    return name;
-  }
-
-  FeedbackQueue(Feedback* feedback) {
-    this->feedback = feedback;
-  }
-  FeedbackQueue(Feedback* feedback, const char* name) {
-    this->feedback = feedback;
-    this->name = name;
-  }
-  
-protected:
-  Feedback* feedback;
-  const char* name = "FeedbackQueue";
-
-};
-
-struct GlobalQueue : public AbstractQueue {
-
-  virtual const char* getQueueName() {
-    return "GlobalQueue";
-  }
-
-  QueueEntry* get(Engine* engine) {
-    if (currentsQueues[engine] != nullptr)
-      return currentsQueues[engine]->get(engine);
-    return AbstractQueue::get(engine);
-  }
-  QueueEntry* getNext(Engine* engine) {
-    int choice = schedule();
-    if (choice < 0 || feedbackQueues[choice]->getSize() == 0) {
-      currentsQueues[engine] = nullptr;
-      return AbstractQueue::getNext(engine);
-    } else {
-      currentsQueues[engine] = feedbackQueues[choice];
-      return currentsQueues[engine]->getNext(engine);
-    }
-  }
-
-  int schedule() { // Random naive schedule
-
-    if (feedbackQueues.size() == 0 || Random::below(2))
-      return -1; // Schedule Global
-    return Random::below(feedbackQueues.size());
-
-  }
-
-  void addFeedbackQueue(FeedbackQueue* queue) {
-    feedbackQueues.push_back(queue);
-  }
-
-protected:
-  std::vector<FeedbackQueue*> feedbackQueues;
-  std::map<Engine*, FeedbackQueue*> currentsQueues;
 
 };
 

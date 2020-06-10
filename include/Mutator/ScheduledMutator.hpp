@@ -1,17 +1,11 @@
 #pragma once
 
-#include "VirtualInput.hpp"
+#include "Mutator/Mutator.hpp"
 #include "Random.hpp"
 
 #include <vector>
 
 namespace FFF {
-
-struct Mutator {
-
-  virtual void mutate(VirtualInput* input, size_t stage_idx) = 0;
-
-};
 
 typedef void (*MutationFunctionType)(VirtualInput*);
 

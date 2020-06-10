@@ -1,14 +1,15 @@
 #pragma once
 
-#include "VirtualInput.hpp"
-#include "Stage.hpp"
-#include "Engine.hpp"
-#include "Queue.hpp"
+#include "Input/VirtualInput.hpp"
+#include "Stage/FuzzingStage.hpp"
+#include "Queue/BaseQueue.hpp"
 #include "Random.hpp"
 
 #include <vector>
 
 namespace FFF {
+
+struct Engine;
 
 struct FuzzOne {
 
@@ -18,7 +19,7 @@ struct FuzzOne {
 
 struct MutationalFuzzOne : FuzzOne {
 
-  MutationalFuzzOne(Engine* engine, AbstractQueue* queue) {
+  MutationalFuzzOne(Engine* engine, BaseQueue* queue) {
     this->engine = engine;
     this->queue = queue;
   }
@@ -41,7 +42,7 @@ struct MutationalFuzzOne : FuzzOne {
 
 protected:
   Engine* engine;
-  AbstractQueue* queue;
+  BaseQueue* queue;
   std::vector<Stage*> stages;
 
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <string>
 
 namespace FFF {
@@ -45,7 +44,7 @@ struct Bytes : public std::basic_string<char> {
 
 struct VirtualInput {
 
-  virtual void deserialize(const Bytes& bytes);
+  virtual void deserialize(const Bytes& bytes) = 0;
   virtual Bytes serialize() = 0;
   virtual bool alreadySerialized() = 0;
   virtual Bytes& raw() = 0;

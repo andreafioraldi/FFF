@@ -1,10 +1,10 @@
-#include "Stage.hpp"
+#include "Stage/Stage.hpp"
+#include "Mutator/Mutator.hpp"
 #include "Engine.hpp"
-#include "Mutator.hpp"
 
 using namespace FFF;
 
-void Stage::perform(VirtualInput* input) {
+void FuzzingStage::perform(VirtualInput* input) {
 
   size_t num = iterations();
   if (!input->hasClone())
