@@ -4,7 +4,7 @@
 
 namespace FFF {
 
-struct RawInput : VirtualInput {
+struct RawInput : public VirtualInput {
 
   RawInput() {}
   RawInput(const Bytes& bytes) {

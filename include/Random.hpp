@@ -7,9 +7,11 @@ namespace FFF {
 
 struct Random {
 
+  static void init() {
+    srand(time(NULL));
+  }
   static void init(int seed) {
-    if (seed) srand(seed);
-    else srand(time(NULL));
+    srand(seed);
   }
   
   static int below(int max) {

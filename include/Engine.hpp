@@ -2,9 +2,7 @@
 
 #include "Input/VirtualInput.hpp"
 #include "Feedback/Feedback.hpp"
-#include "FuzzOne/FuzzOne.hpp"
 #include "Queue/GlobalQueue.hpp"
-#include "FuzzOne/FuzzOne.hpp"
 #include "Random.hpp"
 
 #include <vector>
@@ -12,26 +10,44 @@
 
 namespace FFF {
 
+struct FuzzOne;
+
 struct Engine {
+
+  Engine(Executor* executor, GlobalQueue* queue) {
+    this->executor = executor;
+    this->queue = queue;
+  }
+
+  GlobalQueue* getQueue() {
+    return queue;
+  }
 
   void setFuzzOne(FuzzOne* fuzz_one) {
     this->fuzz_one = fuzz_one;
   }
-  void setQueue(GlobalQueue* queue) {
-    this->queue = queue;
+  FuzzOne* getFuzzOne() {
+    return fuzz_one;
   }
-  void setExecutor(Executor* executor) {
-    this->executor = executor;
+  template <class T, typename...Ts>
+  T* createFuzzOne(Ts... args) {
+    T* obj = new T(this, args...);
+    setFuzzOne(static_cast<FuzzOne*>(obj));
+    return obj;
   }
+
   void addFeedback(Feedback* feedback) {
     feedbacks.push_back(feedback);
   }
+  template <class T, typename...Ts>
+  T* createFeedback(Ts... args) {
+    T* obj = new T(args...);
+    addFeedback(static_cast<Feedback*>(obj));
+    return obj;
+  }
 
   void execute(VirtualInput* input);
-  void loop() {
-    while (true)
-      fuzz_one->perform();
-  }
+  void loop();
   
   void loadTestcasesFromDir(const std::string& path);
   void loadZeroTestcase(size_t size);

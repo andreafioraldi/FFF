@@ -3,6 +3,8 @@
 #include "Input/VirtualInput.hpp"
 #include "Stage/FuzzingStage.hpp"
 #include "Queue/BaseQueue.hpp"
+#include "Object.hpp"
+#include "Engine.hpp"
 #include "Random.hpp"
 
 #include <vector>
@@ -11,22 +13,26 @@ namespace FFF {
 
 struct Engine;
 
-struct FuzzOne {
+struct FuzzOne : public Object {
+
+  FuzzOne(Engine* engine) {
+    this->engine = engine;
+  }
 
   virtual void perform() = 0;
 
+protected:
+  Engine* engine;
+
 };
 
-struct MutationalFuzzOne : FuzzOne {
+struct StagedFuzzOne : public FuzzOne {
 
-  MutationalFuzzOne(Engine* engine, BaseQueue* queue) {
-    this->engine = engine;
-    this->queue = queue;
-  }
+  using FuzzOne::FuzzOne;
 
   void perform() {
   
-    QueueEntry* q = queue->getNext(engine);
+    QueueEntry* q = engine->getQueue()->getNext(engine);
     if (!q) return;
 
     VirtualInput* input = q->getInput();
@@ -39,10 +45,14 @@ struct MutationalFuzzOne : FuzzOne {
   void addStage(Stage* stage) {
     stages.push_back(stage);
   }
+  template <class T, typename...Ts>
+  T* createStage(Ts... args) {
+    T* obj = new T(engine, args...);
+    addStage(static_cast<Stage*>(obj));
+    return obj;
+  }
 
 protected:
-  Engine* engine;
-  BaseQueue* queue;
   std::vector<Stage*> stages;
 
 };

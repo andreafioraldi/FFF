@@ -9,7 +9,7 @@ namespace FFF {
 
 struct Mutator;
 
-struct FuzzingStage : Stage {
+struct FuzzingStage : public Stage {
 
   using Stage::Stage;
 
@@ -21,6 +21,12 @@ struct FuzzingStage : Stage {
 
   void addMutator(Mutator* mutator) {
     mutators.push_back(mutator);
+  }
+  template <class T, typename...Ts>
+  T* createMutator(Ts... args) {
+    T* obj = new T(this, args...);
+    addMutator(static_cast<Mutator*>(obj));
+    return obj;
   }
 
 protected:

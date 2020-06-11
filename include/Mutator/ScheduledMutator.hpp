@@ -7,9 +7,11 @@
 
 namespace FFF {
 
-typedef void (*MutationFunctionType)(VirtualInput*);
+typedef void (*MutationFunctionType)(Mutator*, VirtualInput*);
 
-struct ScheduledMutator : Mutator {
+struct ScheduledMutator : public Mutator {
+
+  using Mutator::Mutator;
 
   int iterations() {
     return 1 << (1 + Random::below(7));
@@ -22,7 +24,7 @@ struct ScheduledMutator : Mutator {
   void mutate(VirtualInput* input, size_t stage_idx) {
     int num = iterations();
     for (int i = 0; i < num; ++i) {
-      mutations[schedule()](input);
+      mutations[schedule()](this, input);
     }
   }
 
@@ -37,9 +39,9 @@ protected:
 
 void addHavocMutations(ScheduledMutator* mut);
 
-struct HavocMutator : ScheduledMutator {
+struct HavocMutator : public ScheduledMutator {
 
-  HavocMutator() {
+  HavocMutator(FuzzingStage* stage) : ScheduledMutator(stage) {
     addHavocMutations(this);
   }
 

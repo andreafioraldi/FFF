@@ -6,11 +6,13 @@
 #include "Executor/InMemoryExecutor.hpp"
 #include "Feedback/MaximizeMapFeedback.hpp"
 #include "Observation/MapObservationChannel.hpp"
+#include "OS/Crash.hpp"
 #include "Engine.hpp"
+#include "Random.hpp"
 
 #include "Config.h"
 
-#include "argparse.h"
+#include "third_party/argparse.h"
 #include <iostream>
 
 using namespace FFF;
@@ -43,33 +45,25 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  Engine engine;
-
+  Random::init();  
+  installCrashHandlers(&dumpInMemoryCrashToFileHandler);
+  
   InMemoryExecutor exe(&LLVMFuzzerTestOneInput);
+  GlobalQueue q;
+  Engine engine(&exe, &q);
   
-  HitcountsMapObservationChannel hits_obs(__fff_edges_map, MAP_SIZE);
-  MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> hits_feed(MAP_SIZE);
-  exe.addObserver(&hits_obs);
+  exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, MAP_SIZE);
+  engine.createFeedback< MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(MAP_SIZE);
+  exe.createObservationChannel<CmpMapObservationChannel>(__fff_cmp_map, MAP_SIZE);
   
-  CmpMapObservationChannel cmp_obs(__fff_cmp_map, MAP_SIZE);
-  MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> cmp_feed(MAP_SIZE);
-  FeedbackQueue cmp_queue(&cmp_feed, "CmpQueue");
-  cmp_feed.setFeedbackQueue(&cmp_queue);
-  exe.addObserver(&cmp_obs);
+  Feedback* f = engine.createFeedback< MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> >(MAP_SIZE);
+  FeedbackQueue fq(f, "CmpQueue");
+  f->setFeedbackQueue(&fq);
+  q.addFeedbackQueue(&fq);
   
-  GlobalQueue queue;
-  queue.addFeedbackQueue(&cmp_queue);
-  MutationalFuzzOne fuzz_one(&engine, &queue);
-  FuzzingStage havoc(&engine);
-  HavocMutator havoc_mut;
-  havoc.addMutator(&havoc_mut);
-  fuzz_one.addStage(&havoc);
-  
-  engine.setExecutor(&exe);
-  engine.setFuzzOne(&fuzz_one);
-  engine.setQueue(&queue);
-  engine.addFeedback(&hits_feed);
-  engine.addFeedback(&cmp_feed);
+  engine.createFuzzOne<StagedFuzzOne>()
+        ->createStage<FuzzingStage>()
+        ->createMutator<HavocMutator>();
   
   if (LLVMFuzzerInitialize) LLVMFuzzerInitialize(&argc, &argv);
   

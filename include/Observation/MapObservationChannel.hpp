@@ -6,7 +6,7 @@
 namespace FFF {
 
 template<typename BaseType>
-struct MapObservationChannel : ObservationChannel {
+struct MapObservationChannel : public ObservationChannel {
 
   MapObservationChannel(BaseType* traceBits, size_t size) {
     this->traceBits = traceBits;
@@ -30,7 +30,7 @@ protected:
 
 };
 
-struct HitcountsMapObservationChannel : MapObservationChannel<uint8_t> {
+struct HitcountsMapObservationChannel : public MapObservationChannel<uint8_t> {
 
   using MapObservationChannel<uint8_t>::MapObservationChannel;
 
@@ -56,7 +56,7 @@ struct HitcountsMapObservationChannel : MapObservationChannel<uint8_t> {
 
 };
 
-struct CmpMapObservationChannel : MapObservationChannel<uint8_t> {
+struct CmpMapObservationChannel : public MapObservationChannel<uint8_t> {
 
   using MapObservationChannel<uint8_t>::MapObservationChannel;
 

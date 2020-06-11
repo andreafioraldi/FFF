@@ -1,3 +1,4 @@
+#include "FuzzOne/FuzzOne.hpp"
 #include "Engine.hpp"
 #include "Logger.hpp"
 
@@ -7,10 +8,10 @@
 using namespace FFF;
 
 void Engine::execute(VirtualInput* input) {
-  executor->resetObservers();
+  executor->resetObservationChannels();
   executor->placeInput(input);
   executor->runTarget();
-  for (auto obs : executor->getObservers())
+  for (auto obs : executor->getObservationChannels())
     obs->postExec(executor);
   
   bool add_to_queue = false;
@@ -18,6 +19,11 @@ void Engine::execute(VirtualInput* input) {
     add_to_queue = add_to_queue || feedback->isInteresting(executor);
   if (add_to_queue)
     queue->add(new QueueEntry(input, true));
+}
+
+void Engine::loop() {
+  while (true)
+    fuzz_one->perform();
 }
 
 void Engine::loadTestcasesFromDir(const std::string& path) {

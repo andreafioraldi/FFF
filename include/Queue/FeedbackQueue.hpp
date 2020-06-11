@@ -6,7 +6,7 @@ namespace FFF {
 
 struct FeedbackQueue : public BaseQueue {
 
-  virtual const char* getQueueName() {
+  virtual std::string getObjectName() {
     return name;
   }
 

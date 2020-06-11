@@ -14,7 +14,7 @@ struct Engine;
 struct Feedback;
 struct FeedbackMetadata;
 
-struct QueueEntry {
+struct QueueEntry : public Object {
 
   friend class BaseQueue;
 
@@ -64,9 +64,9 @@ protected:
 
 };
 
-struct BaseQueue {
+struct BaseQueue : public Object {
 
-  virtual const char* getQueueName() {
+  virtual std::string getObjectName() {
     return "BaseQueue";
   }
 
@@ -75,7 +75,7 @@ struct BaseQueue {
     if (base) base->prev = entry;
     base = entry;
     size++;
-    Logger::log(getQueueName(), " ADD: size = ", size, "\n");
+    Logger::log(getObjectName(), " ADD: size = ", size, "\n");
   }
   virtual void remove(QueueEntry* entry) {
     // TODO

@@ -1,15 +1,15 @@
 #pragma once
 
 #include "Input/VirtualInput.hpp"
+#include "Object.hpp"
 
 #include <vector>
 
 namespace FFF {
 
 struct Engine;
-struct Mutator;
 
-struct Stage {
+struct Stage : public Object {
 
   Stage(Engine* engine) {
     this->engine = engine;

@@ -8,7 +8,7 @@
 namespace FFF {
 
 template<class BaseType, class ObserverType>
-struct MaximizeMapFeedback : Feedback {
+struct MaximizeMapFeedback : public Feedback {
 
   MaximizeMapFeedback(size_t size) {
     // static_assert(std::is_base_of<MapObservationChannel, ObserverType>::value, "ObserverType must derive from MapObservationChannel");
@@ -24,7 +24,7 @@ struct MaximizeMapFeedback : Feedback {
   
     bool found = false;
 
-    for (auto ob : executor->getObservers()) {
+    for (auto ob : executor->getObservationChannels()) {
       if (auto hmob = dynamic_cast<ObserverType*>(ob)) {
       
         if (size != hmob->getSize()) continue;

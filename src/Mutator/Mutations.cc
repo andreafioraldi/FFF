@@ -40,7 +40,7 @@ static size_t chooseBlockLen(size_t limit) {
 
 namespace FFF {
 
-void FlipBitMutation(VirtualInput* input) {
+void FlipBitMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -48,7 +48,7 @@ void FlipBitMutation(VirtualInput* input) {
   i->raw()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip2BitsMutation(VirtualInput* input) {
+void Flip2BitsMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -59,7 +59,7 @@ void Flip2BitsMutation(VirtualInput* input) {
   i->raw()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip4BitsMutation(VirtualInput* input) {
+void Flip4BitsMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -74,7 +74,7 @@ void Flip4BitsMutation(VirtualInput* input) {
   i->raw()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip8BitsMutation(VirtualInput* input) {
+void Flip8BitsMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -82,7 +82,7 @@ void Flip8BitsMutation(VirtualInput* input) {
   i->raw()[idx] ^= 0xff;
 }
 
-void Flip16BitsMutation(VirtualInput* input) {
+void Flip16BitsMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (size < 2) return;
@@ -90,7 +90,7 @@ void Flip16BitsMutation(VirtualInput* input) {
   i->raw().get<uint16_t>(idx) ^= 0xffff;
 }
 
-void Flip32BitsMutation(VirtualInput* input) {
+void Flip32BitsMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (size < 4) return;
@@ -98,7 +98,7 @@ void Flip32BitsMutation(VirtualInput* input) {
   i->raw().get<uint32_t>(idx) ^= 0xffffffff;
 }
 
-void RandomByteAddSubMutation(VirtualInput* input) {
+void RandomByteAddSubMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -107,7 +107,7 @@ void RandomByteAddSubMutation(VirtualInput* input) {
   i->raw()[idx] += 1 + Random::below(ARITH_MAX);
 }
 
-void RandomWordAddSubMutation(VirtualInput* input) {
+void RandomWordAddSubMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (size < 2) return;
@@ -120,7 +120,7 @@ void RandomWordAddSubMutation(VirtualInput* input) {
   i->raw().setEndian(idx, val + 1 + Random::below(ARITH_MAX), endian);
 }
 
-void RandomDwordAddSubMutation(VirtualInput* input) {
+void RandomDwordAddSubMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (size < 4) return;
@@ -133,7 +133,7 @@ void RandomDwordAddSubMutation(VirtualInput* input) {
   i->raw().setEndian(idx, val + 1 + Random::below(ARITH_MAX), endian);
 }
 
-void RandomByteMutation(VirtualInput* input) {
+void RandomByteMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -141,7 +141,7 @@ void RandomByteMutation(VirtualInput* input) {
   i->raw()[idx] ^= 1 + Random::below(255);
 }
 
-void DeleteBytesMutation(VirtualInput* input) {
+void DeleteBytesMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (size < 2) return;
@@ -150,7 +150,7 @@ void DeleteBytesMutation(VirtualInput* input) {
   i->raw().erase(del_from, del_len);
 }
 
-void CloneBytesMutation(VirtualInput* input) {
+void CloneBytesMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;
@@ -168,7 +168,7 @@ void CloneBytesMutation(VirtualInput* input) {
   }
 }
 
-void OverwriteBytesMutation(VirtualInput* input) {
+void OverwriteBytesMutation(Mutator* mutator, VirtualInput* input) {
   RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->raw().size();
   if (!size) return;

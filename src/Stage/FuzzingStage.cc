@@ -1,4 +1,4 @@
-#include "Stage/Stage.hpp"
+#include "Stage/FuzzingStage.hpp"
 #include "Mutator/Mutator.hpp"
 #include "Engine.hpp"
 

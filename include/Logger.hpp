@@ -12,17 +12,23 @@ struct Logger {
   }
 
   template <typename T, typename...Ts>
+  static inline void logAux(T &&first, Ts&&... rest) {
+    *outstream << std::forward<T>(first);
+    logAux(std::forward<Ts>(rest)...);
+  }
+  static inline void logAux() {}
+
+  template <typename T, typename...Ts>
   static void log(T &&first, Ts&&... rest) {
     if (outstream) {
-      *outstream << std::forward<T>(first);
-      log(std::forward<Ts>(rest)...);
+      *outstream << header << std::forward<T>(first);
+      logAux(std::forward<Ts>(rest)...);
     }
   }
   
-  static inline void log() {}
-
 private:
   static std::ostream* outstream;
+  static std::string header;
 
 };
 
