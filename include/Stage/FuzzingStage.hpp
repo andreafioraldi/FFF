@@ -17,7 +17,7 @@ struct FuzzingStage : public Stage {
     return Random::below(128);
   }
 
-  void perform(VirtualInput* input);
+  void perform(std::shared_ptr<VirtualInput> input);
 
   void addMutator(Mutator* mutator) {
     mutators.push_back(mutator);

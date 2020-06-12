@@ -1,4 +1,5 @@
 #include "FuzzOne/FuzzOne.hpp"
+#include "Input/RawInput.hpp"
 #include "Engine.hpp"
 #include "Logger.hpp"
 
@@ -7,7 +8,7 @@
 
 using namespace FFF;
 
-void Engine::execute(VirtualInput* input) {
+void Engine::execute(const std::shared_ptr<VirtualInput>& input) {
   executor->resetObservationChannels();
   executor->placeInput(input);
   executor->runTarget();
@@ -18,7 +19,7 @@ void Engine::execute(VirtualInput* input) {
   for(auto feedback : feedbacks)
     add_to_queue = add_to_queue || feedback->isInteresting(executor);
   if (add_to_queue)
-    queue->add(new QueueEntry(input, true));
+    queue->add(new QueueEntry(input->copy(), queue));
 }
 
 void Engine::loop() {
@@ -29,19 +30,19 @@ void Engine::loop() {
 void Engine::loadTestcasesFromDir(const std::string& path) {
   for (const auto & entry : std::filesystem::directory_iterator(path)) {
     if (!entry.is_regular_file())
-      std::cerr << "LOADING: Skipping " << entry << " because is not a regular file\n";
+      Logger::log("LOADING: Skipping ", entry, " because is not a regular file\n");
     else {
       std::ifstream input(entry.path().c_str(), std::ios::binary);
       Bytes bytes((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
       input.close();
-      RawInput* raw = new RawInput(bytes);
-      std::cerr << "LOADING: Executing " << entry << "\n";
+      auto raw = std::make_shared<RawInput>(bytes);
+      Logger::log("LOADING: Executing ", entry, "\n");
       execute(raw);
     }
   }
 }
 
 void Engine::loadZeroTestcase(size_t size) {
-  RawInput* zero = new RawInput(Bytes(size, 0));
-  execute(zero);
+  auto raw = std::make_shared<RawInput>(Bytes(size, 0));
+  execute(raw);
 }

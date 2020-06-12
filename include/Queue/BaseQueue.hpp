@@ -13,20 +13,25 @@ namespace FFF {
 struct Engine;
 struct Feedback;
 struct FeedbackMetadata;
+struct BaseQueue;
 
 struct QueueEntry : public Object {
 
   friend class BaseQueue;
 
-  QueueEntry(VirtualInput* input) {
+  QueueEntry(const std::shared_ptr<VirtualInput>& input, BaseQueue* queue) {
     this->input = input;
-  }
-  QueueEntry(VirtualInput* input, bool isGlobal) {
-    this->input = input;
-    this->isGlobalFlag = isGlobal;
+    this->queue = queue;
+    /*if (queue->getSaveToFiles()) {
+      filename = queue->getDirectory() + "/testcase-" + std::to_string(queue->getSize());
+      input->saveToFile(filename);
+      input->clear();
+    }*/
   }
   
-  VirtualInput* getInput() {
+  std::shared_ptr<VirtualInput>& getInput() {
+    //if (input->isEmpty())
+    //  input->loadFromFile(filename);
     return input;
   }
   FeedbackMetadata* getMeta() {
@@ -34,9 +39,6 @@ struct QueueEntry : public Object {
   }
   void setMeta(FeedbackMetadata* meta) {
     this->meta = meta;
-  }
-  bool isGlobal() {
-    return isGlobalFlag;
   }
   
   QueueEntry* getNext() {
@@ -51,11 +53,12 @@ struct QueueEntry : public Object {
   QueueEntry* getChild(size_t index) {
     return children.at(index);
   }
-
+  
 protected:
-  VirtualInput* input;
+  std::shared_ptr<VirtualInput> input;
+  std::string filename;
   FeedbackMetadata* meta = nullptr;
-  bool isGlobalFlag = true;
+  BaseQueue* queue;
 
   QueueEntry* next = nullptr;
   QueueEntry* prev = nullptr;
@@ -65,6 +68,10 @@ protected:
 };
 
 struct BaseQueue : public Object {
+
+  BaseQueue() {
+    dirpath = getObjectName();
+  }
 
   virtual std::string getObjectName() {
     return "BaseQueue";
@@ -98,10 +105,25 @@ struct BaseQueue : public Object {
     return size;
   }
 
+  void setDirectory(std::string path) {
+    dirpath = path;
+  }
+  std::string getDirectory() {
+    return dirpath;
+  }
+  void setSaveToFiles(bool b) {
+    save_to_files = b;
+  }
+  bool getSaveToFiles() {
+    return save_to_files;
+  }
+
 protected:
   QueueEntry* base = nullptr;
   size_t size = 0;
   std::map<Engine*, QueueEntry*> currents;
+  std::string dirpath;
+  bool save_to_files = false;
 
 };
 

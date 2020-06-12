@@ -11,7 +11,7 @@ namespace FFF {
 struct Executor : public Object {
 
   virtual void runTarget() = 0;
-  virtual void placeInput(VirtualInput* input) {
+  virtual void placeInput(const std::shared_ptr<VirtualInput>& input) {
     currentInput = input;
   }
 
@@ -33,13 +33,13 @@ struct Executor : public Object {
     return obj;
   }
   
-  VirtualInput* getCurrentInput() {
+  std::shared_ptr<VirtualInput>& getCurrentInput() {
     return currentInput;
   }
 
 protected:
   std::vector<ObservationChannel*> observers;
-  VirtualInput* currentInput;
+  std::shared_ptr<VirtualInput> currentInput;
 
 };
 

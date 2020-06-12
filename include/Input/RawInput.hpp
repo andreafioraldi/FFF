@@ -11,34 +11,29 @@ struct RawInput : public VirtualInput {
     this->bytes = bytes;
   }
   
-  virtual void deserialize(const Bytes& bytes) {
+  void deserialize(const Bytes& bytes) {
     this->bytes = bytes;
   }
   Bytes serialize() {
     return bytes;
   }
-  bool alreadySerialized() {
-    return true;
-  }
-  Bytes& raw() {
-    return bytes;
-  }
   
-  void saveClone() {
-    clone = bytes;
-    hasCloneFlag = true;
+  void createBackup() {
+    backup = bytes;
   }
-  void cleanClone() {
-    clone.clear();
-    hasCloneFlag = false;
+  void resetBackup() {
+    bytes = backup;
   }
-  void resetClone() {
-    bytes = clone;
+
+  std::shared_ptr<VirtualInput> copy();
+  
+  Bytes& getBytes() {
+    return bytes;
   }
   
 protected:
   Bytes bytes;
-  Bytes clone;
+  Bytes backup;
 
 };
 

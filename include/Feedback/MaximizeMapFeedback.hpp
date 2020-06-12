@@ -42,7 +42,7 @@ struct MaximizeMapFeedback : public Feedback {
     
     if (feedbackQueue) {
       if (found)
-        feedbackQueue->add(new QueueEntry(executor->getCurrentInput(), false));
+        feedbackQueue->add(new QueueEntry(executor->getCurrentInput(), feedbackQueue));
       
       return false; // never use GlobalQueue
     }

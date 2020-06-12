@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Executor/Executor.hpp"
+#include "Input/RawInput.hpp"
 
 namespace FFF {
 
@@ -17,8 +18,8 @@ struct InMemoryExecutor : public Executor {
 
   void runTarget() {
     current_executor = this;
-    if (currentInput->alreadySerialized()) {
-      harnessFunction((const uint8_t*)currentInput->raw().data(), currentInput->raw().size());
+    if (auto raw = std::dynamic_pointer_cast<RawInput>(currentInput)) {
+      harnessFunction((const uint8_t*)raw->getBytes().data(), raw->getBytes().size());
     } else {
       Bytes bytes = currentInput->serialize();
       harnessFunction((const uint8_t*)bytes.data(), bytes.size());

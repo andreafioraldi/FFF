@@ -1,6 +1,7 @@
 #include "Queue/GlobalQueue.hpp"
 #include "Queue/FeedbackQueue.hpp"
 #include "Mutator/ScheduledMutator.hpp"
+#include "Input/RawInput.hpp"
 #include "Stage/FuzzingStage.hpp"
 #include "FuzzOne/FuzzOne.hpp"
 #include "Executor/InMemoryExecutor.hpp"

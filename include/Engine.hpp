@@ -46,7 +46,7 @@ struct Engine {
     return obj;
   }
 
-  void execute(VirtualInput* input);
+  void execute(const std::shared_ptr<VirtualInput>& input);
   void loop();
   
   void loadTestcasesFromDir(const std::string& path);
