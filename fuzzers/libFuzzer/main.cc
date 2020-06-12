@@ -14,6 +14,7 @@
 #include "Config.h"
 
 #include "third_party/argparse.h"
+#include <filesystem>
 #include <iostream>
 
 using namespace FFF;
@@ -49,18 +50,25 @@ int main(int argc, char** argv) {
   Random::init();  
   installCrashHandlers(&dumpInMemoryCrashToFileHandler);
   
+  GlobalQueue main_queue;
+  main_queue.setDirectory(cmd.get<std::string>("output") + "/GlobalQueue");
+  std::filesystem::create_directories(main_queue.getDirectory());
+  
   InMemoryExecutor exe(&LLVMFuzzerTestOneInput);
-  GlobalQueue q;
-  Engine engine(&exe, &q);
+  Engine engine(&exe, &main_queue);
   
   exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, MAP_SIZE);
   engine.createFeedback< MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(MAP_SIZE);
   exe.createObservationChannel<CmpMapObservationChannel>(__fff_cmp_map, MAP_SIZE);
   
-  Feedback* f = engine.createFeedback< MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> >(MAP_SIZE);
-  FeedbackQueue fq(f, "CmpQueue");
-  f->setFeedbackQueue(&fq);
-  q.addFeedbackQueue(&fq);
+  Feedback* cmp_feedback = engine.createFeedback< MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> >(MAP_SIZE);
+  
+  FeedbackQueue cmp_queue(cmp_feedback, "CmpQueue");
+  cmp_queue.setDirectory(cmd.get<std::string>("output") + "/CmpQueue");
+  std::filesystem::create_directories(cmp_queue.getDirectory());
+  
+  cmp_feedback->setFeedbackQueue(&cmp_queue);
+  main_queue.addFeedbackQueue(&cmp_queue);
   
   engine.createFuzzOne<StagedFuzzOne>()
         ->createStage<FuzzingStage>()
@@ -71,7 +79,7 @@ int main(int argc, char** argv) {
   if (!cmd.exists("i"))
     engine.loadZeroTestcase(4);
   else
-    engine.loadTestcasesFromDir(cmd.get<std::string>("input"));
+    engine.loadTestcasesFromDir<RawInput>(cmd.get<std::string>("input"));
   
   engine.loop();
 

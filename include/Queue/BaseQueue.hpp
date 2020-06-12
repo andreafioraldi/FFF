@@ -19,19 +19,11 @@ struct QueueEntry : public Object {
 
   friend class BaseQueue;
 
-  QueueEntry(const std::shared_ptr<VirtualInput>& input, BaseQueue* queue) {
-    this->input = input;
-    this->queue = queue;
-    /*if (queue->getSaveToFiles()) {
-      filename = queue->getDirectory() + "/testcase-" + std::to_string(queue->getSize());
-      input->saveToFile(filename);
-      input->clear();
-    }*/
-  }
+  QueueEntry(const std::shared_ptr<VirtualInput>& input, BaseQueue* queue);
   
   std::shared_ptr<VirtualInput>& getInput() {
-    //if (input->isEmpty())
-    //  input->loadFromFile(filename);
+    if (input->isEmpty())
+      input->loadFromFile(filename);
     return input;
   }
   FeedbackMetadata* getMeta() {
@@ -69,10 +61,6 @@ protected:
 
 struct BaseQueue : public Object {
 
-  BaseQueue() {
-    dirpath = getObjectName();
-  }
-
   virtual std::string getObjectName() {
     return "BaseQueue";
   }
@@ -107,15 +95,20 @@ struct BaseQueue : public Object {
 
   void setDirectory(std::string path) {
     dirpath = path;
+    save_to_files = true;
   }
   std::string getDirectory() {
     return dirpath;
   }
-  void setSaveToFiles(bool b) {
-    save_to_files = b;
+  void unsetDirectory() {
+    dirpath = "";
+    save_to_files = false;
   }
   bool getSaveToFiles() {
     return save_to_files;
+  }
+  size_t& getNamesID() {
+    return names_id;
   }
 
 protected:
@@ -123,6 +116,7 @@ protected:
   size_t size = 0;
   std::map<Engine*, QueueEntry*> currents;
   std::string dirpath;
+  size_t names_id = 0;
   bool save_to_files = false;
 
 };

@@ -5,6 +5,7 @@
 #include "Queue/GlobalQueue.hpp"
 #include "Random.hpp"
 
+#include <filesystem>
 #include <vector>
 #include <map>
 
@@ -49,7 +50,20 @@ struct Engine {
   void execute(const std::shared_ptr<VirtualInput>& input);
   void loop();
   
-  void loadTestcasesFromDir(const std::string& path);
+  template<class InputClass>
+  void loadTestcasesFromDir(const std::string& path) {
+    for (const auto & entry : std::filesystem::directory_iterator(path)) {
+      if (!entry.is_regular_file())
+        Logger::log("LOADING: Skipping ", entry, " because is not a regular file\n");
+      else {
+        auto input = std::make_shared<InputClass>();
+        input->loadFromFile(entry.path());
+        Logger::log("LOADING: Executing ", entry, "\n");
+        execute(input);
+      }
+    }
+  }
+
   void loadZeroTestcase(size_t size);
 
 protected:

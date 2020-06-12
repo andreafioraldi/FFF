@@ -21,6 +21,11 @@ struct VirtualInput : public Object {
   virtual void resetBackup() = 0;
 
   virtual std::shared_ptr<VirtualInput> copy() = 0;
+  
+  virtual void loadFromFile(std::string path) = 0;
+  virtual void saveToFile(std::string path) = 0;
+  virtual void clear() = 0;
+  virtual bool isEmpty() = 0;
 
 protected:
   bool has_backup;

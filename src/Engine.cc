@@ -4,7 +4,6 @@
 #include "Logger.hpp"
 
 #include <filesystem>
-#include <fstream>
 
 using namespace FFF;
 
@@ -25,21 +24,6 @@ void Engine::execute(const std::shared_ptr<VirtualInput>& input) {
 void Engine::loop() {
   while (true)
     fuzz_one->perform();
-}
-
-void Engine::loadTestcasesFromDir(const std::string& path) {
-  for (const auto & entry : std::filesystem::directory_iterator(path)) {
-    if (!entry.is_regular_file())
-      Logger::log("LOADING: Skipping ", entry, " because is not a regular file\n");
-    else {
-      std::ifstream input(entry.path().c_str(), std::ios::binary);
-      Bytes bytes((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
-      input.close();
-      auto raw = std::make_shared<RawInput>(bytes);
-      Logger::log("LOADING: Executing ", entry, "\n");
-      execute(raw);
-    }
-  }
 }
 
 void Engine::loadZeroTestcase(size_t size) {

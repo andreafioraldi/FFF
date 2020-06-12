@@ -15,7 +15,7 @@ endif()
 
 include(GNUInstallDirs)
 
-file(GLOB SOURCE_FILES src/*.cc src/Executor/*.cc src/Input/*.cc src/Mutator/*.cc src/Stage/*.cc src/OS/*.cc src/OS/*/*.cc)
+file(GLOB SOURCE_FILES src/*.cc src/Executor/*.cc src/Input/*.cc src/Mutator/*.cc src/Queue/*.cc src/Stage/*.cc src/OS/*.cc src/OS/*/*.cc)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
