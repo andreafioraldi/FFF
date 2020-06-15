@@ -13,20 +13,20 @@ typedef int (*HarnessFunctionType)(const uint8_t* data, size_t size);
 struct Executor : public Object {
 
   virtual void runTarget() = 0;
-  virtual void placeInput(const std::shared_ptr<VirtualInput>& input) {
-    currentInput = input;
+  virtual void placeInput(VirtualInput* input) {
+    current_input = input;
   }
 
   void resetObservationChannels() {
-    for (auto obv : observers)
+    for (auto obv : channels)
       obv->reset();
   }
 
   std::vector<ObservationChannel*>& getObservationChannels() {
-    return observers;
+    return channels;
   }
   void addObservationChannel(ObservationChannel* obs) {
-    observers.push_back(obs);
+    channels.push_back(obs);
   }
   template <class T, typename...Ts>
   T* createObservationChannel(Ts... args) {
@@ -35,13 +35,13 @@ struct Executor : public Object {
     return obj;
   }
   
-  std::shared_ptr<VirtualInput>& getCurrentInput() {
-    return currentInput;
+  VirtualInput* getCurrentInput() {
+    return current_input;
   }
 
 protected:
-  std::vector<ObservationChannel*> observers;
-  std::shared_ptr<VirtualInput> currentInput;
+  std::vector<ObservationChannel*> channels;
+  VirtualInput* current_input;
 
 };
 

@@ -35,10 +35,15 @@ struct StagedFuzzOne : public FuzzOne {
     QueueEntry* q = engine->getQueue()->getNext(engine);
     if (!q) return;
 
-    std::shared_ptr<VirtualInput> input = q->getInput();
+    VirtualInput* original = q->getInput();
+    VirtualInput* input = original->copy();
     
     for(auto stage : stages)
-      stage->perform(input);
+      stage->perform(input, original);
+
+    if (q->isOnDisk())
+      delete original;
+    delete input;
 
   }
   

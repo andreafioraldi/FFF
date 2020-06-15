@@ -4,17 +4,16 @@
 
 using namespace FFF;
 
-void FuzzingStage::perform(std::shared_ptr<VirtualInput> input) {
+void FuzzingStage::perform(VirtualInput* input, VirtualInput* original) {
 
   size_t num = iterations();
-  if (!input->hasBackup())
-      input->createBackup();
 
   for(size_t i = 0; i < num; ++i) {
     for (auto mut : mutators)
       mut->mutate(input, i);
     engine->execute(input);
-    input->resetBackup();
+    if (original)
+      input->restore(original);
   }
 
 }

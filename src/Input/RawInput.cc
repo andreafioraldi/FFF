@@ -4,15 +4,18 @@
 
 using namespace FFF;
 
-std::shared_ptr<VirtualInput> RawInput::copy() {
-  return std::shared_ptr<VirtualInput>(new RawInput(bytes));
+VirtualInput* RawInput::copy() {
+  return new RawInput(bytes);
+}
+
+VirtualInput* RawInput::empty() {
+ return new RawInput();
 }
 
 void RawInput::loadFromFile(std::string path) {
   std::ifstream ifile(path.c_str(), std::ios::binary);
   bytes = Bytes((std::istreambuf_iterator<char>(ifile)), (std::istreambuf_iterator<char>()));
   ifile.close();
-  is_empty = false;
 }
 
 void RawInput::saveToFile(std::string path) {

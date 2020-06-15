@@ -2,12 +2,15 @@
 
 using namespace FFF;
 
-QueueEntry::QueueEntry(const std::shared_ptr<VirtualInput>& input, BaseQueue* queue) {
-  this->input = input;
+QueueEntry::QueueEntry(VirtualInput* input, BaseQueue* queue) {
   this->queue = queue;
   if (queue->getSaveToFiles()) {
     filename = queue->getDirectory() + "/testcase-" + std::to_string(queue->getNamesID()++);
     input->saveToFile(filename);
-    input->clear();
+    this->input = input->empty();
+    on_disk = true;
+  } else {
+    this->input = input->copy();
+    on_disk = false;
   }
 }

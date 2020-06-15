@@ -7,7 +7,7 @@
 
 using namespace FFF;
 
-void Engine::execute(const std::shared_ptr<VirtualInput>& input) {
+void Engine::execute(VirtualInput* input) {
   executor->resetObservationChannels();
   executor->placeInput(input);
   executor->runTarget();
@@ -27,6 +27,6 @@ void Engine::loop() {
 }
 
 void Engine::loadZeroTestcase(size_t size) {
-  auto raw = std::make_shared<RawInput>(Bytes(size, 0));
-  execute(raw);
+  RawInput raw(Bytes(size, 0));
+  execute(&raw);
 }

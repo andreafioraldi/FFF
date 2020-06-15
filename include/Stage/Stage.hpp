@@ -15,7 +15,7 @@ struct Stage : public Object {
     this->engine = engine;
   }
 
-  virtual void perform(std::shared_ptr<VirtualInput> input) = 0;
+  virtual void perform(VirtualInput* input, VirtualInput* original) = 0;
 
 protected:
   Engine* engine;

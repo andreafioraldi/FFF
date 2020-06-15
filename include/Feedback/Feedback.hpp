@@ -10,15 +10,15 @@ struct Feedback : public Object {
 
   virtual bool isInteresting(Executor* executor) = 0;
 
-  void setFeedbackQueue(FeedbackQueue* feedbackQueue) {
-    this->feedbackQueue = feedbackQueue;
+  void setFeedbackQueue(FeedbackQueue* feedback_queue) {
+    this->feedback_queue = feedback_queue;
   }
   FeedbackQueue* getFeedbackQueue() {
-    return feedbackQueue;
+    return feedback_queue;
   }
 
 protected:
-  FeedbackQueue* feedbackQueue = nullptr;
+  FeedbackQueue* feedback_queue = nullptr;
   
 };
 

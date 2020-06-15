@@ -13,7 +13,7 @@ struct Mutator : public Object {
     this->stage = stage;
   }
 
-  virtual void mutate(std::shared_ptr<VirtualInput>& input, size_t stage_idx) = 0;
+  virtual void mutate(VirtualInput* input, size_t stage_idx) = 0;
 
   FuzzingStage* getStage() {
     return stage;

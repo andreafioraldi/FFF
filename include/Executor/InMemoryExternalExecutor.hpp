@@ -23,10 +23,10 @@ struct InMemoryExternalExecutor : public Executor {
 
   void runTarget() {
     int status = 0;
-    if (auto raw = std::dynamic_pointer_cast<RawInput>(currentInput)) {
+    if (auto raw = dynamic_cast<RawInput*>(current_input)) {
       runTargetAux(raw->getBytes());
     } else {
-      Bytes bytes = currentInput->serialize();
+      Bytes bytes = current_input->serialize();
       runTargetAux(bytes);
     }
   }

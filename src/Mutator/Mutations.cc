@@ -41,16 +41,16 @@ static size_t chooseBlockLen(size_t limit) {
 
 namespace FFF {
 
-void FlipBitMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void FlipBitMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t bit = Random::below(size << 3);
   i->getBytes()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip2BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void Flip2BitsMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t bit = Random::below(size << 3);
@@ -60,8 +60,8 @@ void Flip2BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
   i->getBytes()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip4BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void Flip4BitsMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t bit = Random::below(size << 3);
@@ -75,32 +75,32 @@ void Flip4BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
   i->getBytes()[bit >> 3] ^= (128 >> (bit & 7));
 }
 
-void Flip8BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void Flip8BitsMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t idx = Random::below(size);
   i->getBytes()[idx] ^= 0xff;
 }
 
-void Flip16BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void Flip16BitsMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (size < 2) return;
   size_t idx = Random::below(size -1);
   i->getBytes().get<uint16_t>(idx) ^= 0xffff;
 }
 
-void Flip32BitsMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void Flip32BitsMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (size < 4) return;
   size_t idx = Random::below(size -3);
   i->getBytes().get<uint32_t>(idx) ^= 0xffffffff;
 }
 
-void RandomByteAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void RandomByteAddSubMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t idx = Random::below(size);
@@ -108,8 +108,8 @@ void RandomByteAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& i
   i->getBytes()[idx] += 1 + Random::below(ARITH_MAX);
 }
 
-void RandomWordAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void RandomWordAddSubMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (size < 2) return;
   int endian = Random::below(2);
@@ -121,8 +121,8 @@ void RandomWordAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& i
   i->getBytes().setEndian(idx, val + 1 + Random::below(ARITH_MAX), endian);
 }
 
-void RandomDwordAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void RandomDwordAddSubMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (size < 4) return;
   int endian = Random::below(2);
@@ -134,16 +134,16 @@ void RandomDwordAddSubMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& 
   i->getBytes().setEndian(idx, val + 1 + Random::below(ARITH_MAX), endian);
 }
 
-void RandomByteMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void RandomByteMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   size_t idx = Random::below(size);
   i->getBytes()[idx] ^= 1 + Random::below(255);
 }
 
-void DeleteBytesMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void DeleteBytesMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (size < 2) return;
   size_t del_len = chooseBlockLen(size -1);
@@ -151,8 +151,8 @@ void DeleteBytesMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input)
   i->getBytes().erase(del_from, del_len);
 }
 
-void CloneBytesMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void CloneBytesMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   int actually_clone = Random::below(4);
@@ -169,8 +169,8 @@ void CloneBytesMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) 
   }
 }
 
-void OverwriteBytesMutation(Mutator* mutator, std::shared_ptr<VirtualInput>& input) {
-  RawInput* i = static_cast<RawInput*>(input.get());
+void OverwriteBytesMutation(Mutator* mutator, VirtualInput* input) {
+  RawInput* i = static_cast<RawInput*>(input);
   size_t size = i->getBytes().size();
   if (!size) return;
   int actually_clone = Random::below(4);

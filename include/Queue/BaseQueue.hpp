@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <shared_mutex>
 
 namespace FFF {
 
@@ -19,12 +20,18 @@ struct QueueEntry : public Object {
 
   friend class BaseQueue;
 
-  QueueEntry(const std::shared_ptr<VirtualInput>& input, BaseQueue* queue);
+  QueueEntry(VirtualInput* input, BaseQueue* queue);
   
-  std::shared_ptr<VirtualInput>& getInput() {
-    if (input->isEmpty())
-      input->loadFromFile(filename);
+  VirtualInput* getInput() {
+    if (on_disk) {
+      VirtualInput* load = input->empty();
+      load->loadFromFile(filename);
+      return load;
+    }
     return input;
+  }
+  bool isOnDisk() {
+    return on_disk;
   }
   FeedbackMetadata* getMeta() {
     return meta;
@@ -47,11 +54,13 @@ struct QueueEntry : public Object {
   }
   
 protected:
-  std::shared_ptr<VirtualInput> input;
+  VirtualInput* input;
+  bool on_disk;
   std::string filename;
+  
   FeedbackMetadata* meta = nullptr;
-  BaseQueue* queue;
 
+  BaseQueue* queue;
   QueueEntry* next = nullptr;
   QueueEntry* prev = nullptr;
   QueueEntry* parent = nullptr;
@@ -67,9 +76,11 @@ struct BaseQueue : public Object {
 
   virtual void add(QueueEntry* entry) {
     entry->next = base;
+    queue_mutex.lock();
     if (base) base->prev = entry;
     base = entry;
     size++;
+    queue_mutex.unlock();
     Logger::log(getObjectName(), " ADD: size = ", size, "\n");
   }
   virtual void remove(QueueEntry* entry) {
@@ -83,7 +94,9 @@ struct BaseQueue : public Object {
     QueueEntry* q = currents[engine];
     if (q == nullptr)
       q = base;
+    queue_mutex.lock_shared();
     currents[engine] = q->next;
+    queue_mutex.unlock_shared();
     return q;
   }
   QueueEntry* getBase() {
@@ -114,7 +127,9 @@ struct BaseQueue : public Object {
 protected:
   QueueEntry* base = nullptr;
   size_t size = 0;
+  std::shared_mutex queue_mutex;
   std::map<Engine*, QueueEntry*> currents;
+
   std::string dirpath;
   size_t names_id = 0;
   bool save_to_files = false;

@@ -7,7 +7,7 @@
 
 namespace FFF {
 
-typedef void (*MutationFunctionType)(Mutator*, std::shared_ptr<VirtualInput>&);
+typedef void (*MutationFunctionType)(Mutator*, VirtualInput*);
 
 struct ScheduledMutator : public Mutator {
 
@@ -21,7 +21,7 @@ struct ScheduledMutator : public Mutator {
     return Random::below(mutations.size());
   }
   
-  void mutate(std::shared_ptr<VirtualInput>& input, size_t stage_idx) {
+  void mutate(VirtualInput* input, size_t stage_idx) {
     int num = iterations();
     for (int i = 0; i < num; ++i) {
       mutations[schedule()](this, input);

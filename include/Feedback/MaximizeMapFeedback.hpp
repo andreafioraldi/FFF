@@ -4,20 +4,21 @@
 #include "Observation/MapObservationChannel.hpp"
 
 #include <type_traits>
+#include <atomic>
 
 namespace FFF {
 
-template<class BaseType, class ObserverType>
+template<class BaseTy, class ObvervationChannelTy>
 struct MaximizeMapFeedback : public Feedback {
 
   MaximizeMapFeedback(size_t size) {
-    // static_assert(std::is_base_of<MapObservationChannel, ObserverType>::value, "ObserverType must derive from MapObservationChannel");
+    static_assert(std::is_base_of<MapObservationChannel<BaseTy>, ObvervationChannelTy>::value, "ObvervationChannelTy must derive from MapObservationChannel");
     this->size = size;
-    virginBits = new BaseType[size]();
+    virgin_bits = new std::atomic<BaseTy>[size]();
   }
 
   virtual ~MaximizeMapFeedback() {
-    delete virginBits;
+    delete virgin_bits;
   }
 
   bool isInteresting(Executor* executor) {
@@ -25,24 +26,31 @@ struct MaximizeMapFeedback : public Feedback {
     bool found = false;
 
     for (auto ob : executor->getObservationChannels()) {
-      if (auto hmob = dynamic_cast<ObserverType*>(ob)) {
+      if (auto hmob = dynamic_cast<ObvervationChannelTy*>(ob)) {
       
         if (size != hmob->getSize()) continue;
       
         for (size_t i = 0; i < size; ++i) {
-          BaseType e = hmob->getTraceBits()[i];
-          if (e > virginBits[i]) {
-            virginBits[i] = e;
-            found = true;
+          // TODO save new bits
+          BaseTy e = hmob->getTraceBits()[i];
+          auto old = virgin_bits[i].load();
+          while (old < e) {
+            bool changed = virgin_bits[i].compare_exchange_weak(old, e);
+            if (!changed)
+              old = virgin_bits[i].load();
+            else {
+              found = true;
+              break;
+            }
           }
         }
       
       }
     }
     
-    if (feedbackQueue) {
+    if (feedback_queue) {
       if (found)
-        feedbackQueue->add(new QueueEntry(executor->getCurrentInput(), feedbackQueue));
+        feedback_queue->add(new QueueEntry(executor->getCurrentInput(), feedback_queue));
       
       return false; // never use GlobalQueue
     }
@@ -52,7 +60,7 @@ struct MaximizeMapFeedback : public Feedback {
   }
 
 private:
-  BaseType* virginBits;
+  std::atomic<BaseTy>* virgin_bits;
   size_t size;
 
 };
