@@ -13,13 +13,24 @@ struct Random {
     init(time(NULL));
   }
   static void init(int seed) {
-    srand(seed);
+    state = seed;
     Logger::logLine("INIT: ", "seed = ", seed);
   }
   
-  static int below(int max) {
-    return rand() % max;
+  static uint64_t random() {
+    uint64_t x = state;
+    x ^= x >> 12;
+    x ^= x << 25;
+    x ^= x >> 27;
+    state = x;
+    return x;
   }
+  
+  static uint64_t below(int max) {
+    return random() % max;
+  }
+
+  static uint64_t state;
 
 };
 

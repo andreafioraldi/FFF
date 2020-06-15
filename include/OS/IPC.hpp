@@ -40,6 +40,7 @@ struct SharedMemSequence {
     auto inc = (idx+1) % num_sequences;
     while (!mem->compare_exchange_weak(old, inc))
       old = idx;
+    std::atomic_thread_fence(std::memory_order_acquire);
   }
 
 protected:
