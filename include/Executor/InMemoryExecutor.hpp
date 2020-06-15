@@ -5,8 +5,6 @@
 
 namespace FFF {
 
-typedef int (*HarnessFunctionType)(const uint8_t* data, size_t size);
-
 struct InMemoryExecutor;
 extern InMemoryExecutor* current_executor;
 
@@ -27,7 +25,7 @@ struct InMemoryExecutor : public Executor {
     current_executor = nullptr;
   }
 
-private:
+protected:
   HarnessFunctionType harnessFunction;
 
 };

@@ -1,9 +1,13 @@
 #pragma once
 
+#include "Bytes.hpp"
+
 namespace FFF {
 
-enum struct CrashType {
-  GENERIC,
+enum struct ExitType {
+  NORMAL,
+  STOP,
+  CRASH,
   SEGV,
   BUS,
   ABRT,
@@ -13,12 +17,14 @@ enum struct CrashType {
   OOM,
 };
 
-typedef void (*CrashHandlerFunction)(CrashType type, void* data);
+void dumpCrashToFile(ExitType type, const Bytes& bytes);
+
+typedef void (*CrashHandlerFunction)(ExitType type, void* data);
 
 void installCrashHandlers(CrashHandlerFunction callback);
 
 // Handlers
 
-void dumpInMemoryCrashToFileHandler(CrashType type, void* data);
+void dumpInMemoryCrashToFileHandler(ExitType type, void* data);
 
 };

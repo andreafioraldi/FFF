@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Instrumentation/Config.h"
 
 #include <stdint.h>
 
@@ -6,8 +6,10 @@
 extern "C" {
 #endif
 
-uint8_t __fff_edges_map[MAP_SIZE];
-uint8_t __fff_cmp_map[MAP_SIZE];
+uint8_t __fff_dummy_map[MAP_SIZE];
+
+uint8_t* __fff_edges_map = __fff_dummy_map;
+uint8_t* __fff_cmp_map = __fff_dummy_map;
 
 void __sanitizer_cov_trace_pc_guard(uint32_t* guard) {
   __fff_edges_map[*guard]++;

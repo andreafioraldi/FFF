@@ -7,30 +7,40 @@ using namespace FFF;
 
 namespace FFF {
 
-static CrashHandlerFunction crash_callback;
+CrashHandlerFunction crash_callback;
+void (*saved_sigactions[32])(int, siginfo_t *, void *);
+void (*saved_sighandlers[32])(int);
 
 static void posixCrashHandler(int signum, siginfo_t * siginfo, void * ucontext) {
-  CrashType type = CrashType::GENERIC;
+  ExitType type = ExitType::CRASH;
   if (signum == SIGSEGV)
-    type = CrashType::SEGV;
+    type = ExitType::SEGV;
   else if (signum == SIGBUS)
-    type = CrashType::BUS;
+    type = ExitType::BUS;
   else if (signum == SIGABRT)
-    type = CrashType::ABRT;
+    type = ExitType::ABRT;
   else if (signum == SIGILL)
-    type = CrashType::ILL;
+    type = ExitType::ILL;
   else if (signum == SIGFPE)
-    type = CrashType::FPE;
+    type = ExitType::FPE;
   if (crash_callback)
     crash_callback(type, nullptr);
-  exit(1);
+  if (saved_sigactions[signum])
+    saved_sigactions[signum](signum, siginfo, ucontext);
+  else if (saved_sighandlers[signum])
+    saved_sighandlers[signum](signum);
 }
 
 static void installSigHandler(int signum, void (*callback)(int, siginfo_t *, void *)) {
   struct sigaction sigact = {};
+  struct sigaction old_sigact = {};
   sigact.sa_flags = SA_SIGINFO;
   sigact.sa_sigaction = callback;
-  assert (sigaction(signum, &sigact, 0) == 0);
+  assert (sigaction(signum, &sigact, &old_sigact) == 0);
+  if (old_sigact.sa_flags & SA_SIGINFO)
+    saved_sigactions[signum] = old_sigact.sa_sigaction;
+  else
+    saved_sighandlers[signum] = old_sigact.sa_handler;
 }
 
 void installCrashHandlers(CrashHandlerFunction callback) {

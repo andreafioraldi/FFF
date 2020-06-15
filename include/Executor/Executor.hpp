@@ -8,6 +8,8 @@
 
 namespace FFF {
 
+typedef int (*HarnessFunctionType)(const uint8_t* data, size_t size);
+
 struct Executor : public Object {
 
   virtual void runTarget() = 0;
