@@ -2,6 +2,6 @@
 
 namespace FFF {
 
-InMemoryExecutor* current_executor;
+InMemoryExecutor* InMemoryExecutor::current_executor = nullptr;
 
 }

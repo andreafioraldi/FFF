@@ -26,5 +26,6 @@ void installCrashHandlers(CrashHandlerFunction callback);
 // Handlers
 
 void dumpInMemoryCrashToFileHandler(ExitType type, void* data);
+void fillSharedCrashReport(ExitType type, void* data);
 
 };

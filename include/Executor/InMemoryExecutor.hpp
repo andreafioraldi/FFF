@@ -5,10 +5,9 @@
 
 namespace FFF {
 
-struct InMemoryExecutor;
-extern InMemoryExecutor* current_executor;
-
 struct InMemoryExecutor : public Executor {
+
+  static InMemoryExecutor* current_executor;
 
   InMemoryExecutor(HarnessFunctionType func) {
     harness = func;

@@ -3,9 +3,12 @@
 #include "Executor/Executor.hpp"
 #include "Input/RawInput.hpp"
 #include "OS/IPC.hpp"
+#include "OS/Crash.hpp"
 #include "OS/Process.hpp"
 
 #include "Config.h"
+
+#include "Logger.hpp"
 
 #include <cstring>
 #include <stdexcept>
@@ -13,6 +16,8 @@
 namespace FFF {
 
 struct InMemoryExternalExecutor : public Executor {
+
+  static InMemoryExternalExecutor* current_executor;
 
   InMemoryExternalExecutor(HarnessFunctionType func) {
     harness = func;
@@ -22,7 +27,6 @@ struct InMemoryExternalExecutor : public Executor {
   virtual void start() {}
 
   void runTarget() {
-    int status = 0;
     if (auto raw = dynamic_cast<RawInput*>(current_input)) {
       runTargetAux(raw->getBytes());
     } else {
@@ -30,33 +34,36 @@ struct InMemoryExternalExecutor : public Executor {
       runTargetAux(bytes);
     }
   }
+  
+  void writeSharedExitType(ExitType exit_type) {
+    pipe2.write(&exit_type, sizeof(ExitType));
+  }
 
 protected:
   void runTargetAux(const Bytes& bytes) {
+    ExitType status = ExitType::NORMAL;
     memcpy(shared_input, bytes.data(), bytes.size());
-    child.resume();
-    ExitType e = child.wait(true);
-    switch(e) {
-      case ExitType::STOP:
-        return;
-      case ExitType::NORMAL:
-        break;
-      default:
-        dumpCrashToFile(e, bytes);
-    }
+    pipe1.write(&status, sizeof(ExitType));
+    pipe2.read(&status, sizeof(ExitType));
+    if (status == ExitType::NORMAL)
+      return;
+    dumpCrashToFile(status, bytes);
     start();
   }
   
   void childRun() {
-    Process* cur = Process::current();
-    int status = 0;
+    current_executor = this;
+    installCrashHandlers(&fillSharedCrashReport);
+    ExitType status = ExitType::NORMAL;
     while (true) {
-      cur->suspend();
+      pipe1.read(&status, sizeof(ExitType));
       harness(shared_input, shared_input_size);
+      pipe2.write(&status, sizeof(ExitType));
     }
   }
 
   Process child;
+  Pipe pipe1, pipe2;
   HarnessFunctionType harness;
   uint8_t* shared_input;
   size_t shared_input_size;
