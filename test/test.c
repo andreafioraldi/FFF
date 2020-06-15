@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-int target_func(char* buf, int size){
+volatile int target_func(char* buf, int size){
     
     switch (buf[0])
     {
@@ -10,7 +10,7 @@ int target_func(char* buf, int size){
         if(buf[1]=='\x44'){
             volatile char* p;
             p = 0;
-            p[0] = 1;
+            //p[0] = 1;
         }
         break;
     case '\xfe':
@@ -22,7 +22,8 @@ int target_func(char* buf, int size){
     case 0xff:
         if(buf[2]=='\xff'){
             if(buf[1]=='\x44'){
-                *(char*)(0xdeadbeef) = 1;
+                //*(char*)(0xdeadbeef) = 1;
+                return 11;
             }else{
                 return 7;
             }
@@ -38,6 +39,5 @@ int target_func(char* buf, int size){
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   //printf(">> %s\n", Data);
-  target_func(Data, Size);
-  return 0;
+  return target_func(Data, Size);
 }

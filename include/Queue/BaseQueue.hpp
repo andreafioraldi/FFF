@@ -2,12 +2,13 @@
 
 #include "Input/VirtualInput.hpp"
 #include "Random.hpp"
-#include "Logger.hpp"
+#include "Monitor.hpp"
 
 #include <vector>
 #include <map>
 #include <string>
 #include <shared_mutex>
+#include <stdexcept>
 
 namespace FFF {
 
@@ -81,7 +82,7 @@ struct BaseQueue : public Object {
     base = entry;
     size++;
     queue_mutex.unlock();
-    Logger::log(getObjectName(), " ADD: size = ", size, "\n");
+    Monitor::event(this, "ADD");
   }
   virtual void remove(QueueEntry* entry) {
     // TODO
@@ -94,6 +95,8 @@ struct BaseQueue : public Object {
     QueueEntry* q = currents[engine];
     if (q == nullptr)
       q = base;
+    if (q == nullptr)
+      throw std::runtime_error(getObjectName() + " is empty");
     queue_mutex.lock_shared();
     currents[engine] = q->next;
     queue_mutex.unlock_shared();

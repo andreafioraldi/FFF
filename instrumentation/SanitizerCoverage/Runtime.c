@@ -11,20 +11,20 @@ uint8_t __fff_dummy_map[MAP_SIZE];
 uint8_t* __fff_edges_map = __fff_dummy_map;
 uint8_t* __fff_cmp_map = __fff_dummy_map;
 
+uint32_t __fff_max_edges_size = 0;
+
 void __sanitizer_cov_trace_pc_guard(uint32_t* guard) {
   __fff_edges_map[*guard]++;
 }
 
 void __sanitizer_cov_trace_pc_guard_init(uint32_t* start, uint32_t* stop) {
  
-  static uint32_t cnt;
-
   if (start == stop || *start) return;
 
-  *(start++) = ++cnt;
+  *(start++) = ++__fff_max_edges_size;
 
   while (start < stop) {
-    *start = ++cnt;
+    *start = ++__fff_max_edges_size;
     start++;
   }
 

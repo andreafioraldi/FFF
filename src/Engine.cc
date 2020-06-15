@@ -1,16 +1,27 @@
 #include "FuzzOne/FuzzOne.hpp"
 #include "Input/RawInput.hpp"
 #include "Engine.hpp"
-#include "Logger.hpp"
+#include "Monitor.hpp"
 
 #include <filesystem>
+
+#define IS_POW2(x) (x && (!(x&(x-1))))
 
 using namespace FFF;
 
 void Engine::execute(VirtualInput* input) {
   executor->resetObservationChannels();
   executor->placeInput(input);
+  
+  if (start_time == 0)
+    start_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  
   executor->runTarget();
+
+  if (IS_POW2(executions))
+    Monitor::event(this, "EXECS");
+  ++executions;
+
   for (auto obs : executor->getObservationChannels())
     obs->postExec(executor);
   

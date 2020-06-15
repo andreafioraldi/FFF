@@ -195,9 +195,9 @@ void addHavocMutations(ScheduledMutator* mut) {
   mut->addMutation(&Flip8BitsMutation);
   mut->addMutation(&Flip16BitsMutation);
   mut->addMutation(&Flip32BitsMutation);
-  mut->addMutation(&RandomByteAddSubMutation);
+  /*mut->addMutation(&RandomByteAddSubMutation);
   mut->addMutation(&RandomWordAddSubMutation);
-  mut->addMutation(&RandomDwordAddSubMutation);
+  mut->addMutation(&RandomDwordAddSubMutation);*/
 
   mut->addMutation(&RandomByteMutation);
   mut->addMutation(&RandomByteMutation);

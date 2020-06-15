@@ -3,6 +3,8 @@
 #include "Queue/BaseQueue.hpp"
 #include "Queue/FeedbackQueue.hpp"
 
+#include <map>
+
 namespace FFF {
 
 struct GlobalQueue : public BaseQueue {

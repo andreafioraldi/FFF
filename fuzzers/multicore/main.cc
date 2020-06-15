@@ -18,22 +18,19 @@
 #include <iostream>
 #include <thread>
 
+#include <pthread.h>
+
 using namespace FFF;
 using namespace argparse;
 
 extern "C" {
 
 extern uint8_t* __fff_edges_map;
-extern uint8_t* __fff_cmp_map;
+
+extern uint32_t __fff_max_edges_size;
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 __attribute__((weak)) int LLVMFuzzerInitialize(int *argc, char ***argv);
-
-}
-
-void loop_engine(Engine* e) {
-
-  e->loop();
 
 }
 
@@ -55,8 +52,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  __fff_edges_map = (uint8_t*)createAnonSharedMem(MAP_SIZE);
-  __fff_cmp_map = (uint8_t*)createAnonSharedMem(MAP_SIZE);
+  __fff_edges_map = (uint8_t*)createAnonSharedMem(__fff_max_edges_size);
 
   Random::init();
   
@@ -67,18 +63,8 @@ int main(int argc, char** argv) {
   InMemoryForkExecutor exe(&LLVMFuzzerTestOneInput);
   Engine engine(&exe, &main_queue);
   
-  exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, MAP_SIZE);
-  Feedback* edges_feedback = engine.createFeedback< MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(MAP_SIZE);
-  
-  exe.createObservationChannel<CmpMapObservationChannel>(__fff_cmp_map, MAP_SIZE);
-  Feedback* cmp_feedback = engine.createFeedback< MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> >(MAP_SIZE);
-  
-  FeedbackQueue cmp_queue(cmp_feedback, "CmpQueue");
-  cmp_queue.setDirectory(cmd.get<std::string>("output") + "/CmpQueue");
-  std::filesystem::create_directories(cmp_queue.getDirectory());
-  
-  cmp_feedback->setFeedbackQueue(&cmp_queue);
-  main_queue.addFeedbackQueue(&cmp_queue);
+  exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, __fff_max_edges_size);
+  Feedback* edges_feedback = engine.createFeedback< AtomicMaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(__fff_max_edges_size);
   
   engine.createFuzzOne<StagedFuzzOne>()
         ->createStage<FuzzingStage>()
@@ -86,37 +72,47 @@ int main(int argc, char** argv) {
   
   std::vector<Engine*> engines;
   
+  Monitor::addEngine(&engine);
+  
   for (size_t i = 1; i < cmd.get<int>("n"); ++i) {
     InMemoryForkExecutor* exec = new InMemoryForkExecutor(&LLVMFuzzerTestOneInput);
-    Engine* e = new Engine(exec, &main_queue);
+    Engine* e = new Engine(exec, &main_queue, i);
     
-    exec->createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, MAP_SIZE);
+    exec->createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, __fff_max_edges_size);
     e->addFeedback(edges_feedback);
-    exec->createObservationChannel<CmpMapObservationChannel>(__fff_cmp_map, MAP_SIZE);
-    e->addFeedback(cmp_feedback);
-    
+
     e->createFuzzOne<StagedFuzzOne>()
         ->createStage<FuzzingStage>()
         ->createMutator<HavocMutator>();
     engines.push_back(e);
+    
+    Monitor::addEngine(e);
   }
   
   if (LLVMFuzzerInitialize) LLVMFuzzerInitialize(&argc, &argv);
-  
-  for (auto e : engines) {
-  
-    if (!cmd.exists("i"))
-      e->loadZeroTestcase(4);
-    else
-      e->loadTestcasesFromDir<RawInput>(cmd.get<std::string>("input"));
-  
-    std::thread * t = new std::thread(loop_engine, e);
-  }
-  
+
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  CPU_SET(0, &cpuset);
+  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+
   if (!cmd.exists("i"))
     engine.loadZeroTestcase(4);
   else
     engine.loadTestcasesFromDir<RawInput>(cmd.get<std::string>("input"));
+
+  for (size_t i = 0; i < engines.size(); ++i) {
+  
+    auto e = engines[i];
+  
+    std::thread * t = new std::thread([](Engine* e) {
+      e->loop();
+    }, e);
+
+    CPU_ZERO(&cpuset);
+    CPU_SET(i+1, &cpuset);
+    pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
+  }
   
   engine.loop();
 

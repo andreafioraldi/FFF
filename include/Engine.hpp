@@ -6,18 +6,25 @@
 #include "Random.hpp"
 
 #include <filesystem>
+#include <atomic>
 #include <vector>
+#include <chrono>
 #include <map>
 
 namespace FFF {
 
 struct FuzzOne;
 
-struct Engine {
+struct Engine : public Object {
 
-  Engine(Executor* executor, GlobalQueue* queue) {
+  Engine(Executor* executor, GlobalQueue* queue, int id = 0) {
     this->executor = executor;
     this->queue = queue;
+    this->id = id;
+  }
+
+  std::string getObjectName() {
+    return "Engine #" + std::to_string(id);
   }
 
   GlobalQueue* getQueue() {
@@ -65,12 +72,26 @@ struct Engine {
   }
 
   void loadZeroTestcase(size_t size);
+  
+  void incrementExecs() {
+    executions++;
+  }
+  size_t getExecs() {
+    return executions.load();
+  }
+  uint64_t getStartTime() {
+    return start_time;
+  }
 
 protected:
   FuzzOne* fuzz_one;
   GlobalQueue* queue;
   Executor* executor;
   std::vector<Feedback*> feedbacks;
+
+  std::atomic<size_t> executions = 0;
+  uint64_t start_time = 0;
+  int id;
 
 };
 

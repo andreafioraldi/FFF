@@ -23,17 +23,10 @@ using namespace argparse;
 extern "C" {
 
 extern uint8_t* __fff_edges_map;
-extern uint8_t* __fff_cmp_map;
+extern uint32_t __fff_max_edges_size;
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 __attribute__((weak)) int LLVMFuzzerInitialize(int *argc, char ***argv);
-
-}
-
-namespace FFF {
-
-uint8_t edges_map[MAP_SIZE];
-uint8_t cmp_map[MAP_SIZE];
 
 }
 
@@ -54,8 +47,9 @@ int main(int argc, char** argv) {
     return 0;
   }
   
-  __fff_edges_map = edges_map;
-  __fff_cmp_map = cmp_map;
+  std::cerr << __fff_max_edges_size << "\n";
+  
+  __fff_edges_map = new uint8_t[__fff_max_edges_size];
   
   Random::init();  
   installCrashHandlers(&dumpInMemoryCrashToFileHandler);
@@ -67,24 +61,16 @@ int main(int argc, char** argv) {
   InMemoryExecutor exe(&LLVMFuzzerTestOneInput);
   Engine engine(&exe, &main_queue);
   
-  exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, MAP_SIZE);
-  engine.createFeedback< MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(MAP_SIZE);
-  exe.createObservationChannel<CmpMapObservationChannel>(__fff_cmp_map, MAP_SIZE);
-  
-  Feedback* cmp_feedback = engine.createFeedback< MaximizeMapFeedback<uint8_t, CmpMapObservationChannel> >(MAP_SIZE);
-  
-  FeedbackQueue cmp_queue(cmp_feedback, "CmpQueue");
-  cmp_queue.setDirectory(cmd.get<std::string>("output") + "/CmpQueue");
-  std::filesystem::create_directories(cmp_queue.getDirectory());
-  
-  cmp_feedback->setFeedbackQueue(&cmp_queue);
-  main_queue.addFeedbackQueue(&cmp_queue);
+  exe.createObservationChannel<HitcountsMapObservationChannel>(__fff_edges_map, __fff_max_edges_size);
+  engine.createFeedback< MaximizeMapFeedback<uint8_t, HitcountsMapObservationChannel> >(__fff_max_edges_size);
   
   engine.createFuzzOne<StagedFuzzOne>()
         ->createStage<FuzzingStage>()
         ->createMutator<HavocMutator>();
   
   if (LLVMFuzzerInitialize) LLVMFuzzerInitialize(&argc, &argv);
+  
+  Monitor::addEngine(&engine);
   
   if (!cmd.exists("i"))
     engine.loadZeroTestcase(4);
