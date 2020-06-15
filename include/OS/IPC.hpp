@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <stdlib.h>
 
 namespace FFF {
@@ -25,5 +26,26 @@ protected:
 };
 
 void* createAnonSharedMem(size_t size);
+
+struct SharedMemSequence {
+
+  SharedMemSequence(int num_sequences) {
+    mem = (std::atomic<int>*)createAnonSharedMem(sizeof(int));
+    *mem = 0;
+    this->num_sequences = num_sequences;
+  }
+
+  void wait(int idx) {
+    auto old = idx;
+    auto inc = (idx+1) % num_sequences;
+    while (!mem->compare_exchange_weak(old, inc))
+      old = idx;
+  }
+
+protected:
+  std::atomic<int>* mem;
+  int num_sequences;
+
+};
 
 };

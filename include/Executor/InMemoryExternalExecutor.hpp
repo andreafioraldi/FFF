@@ -19,7 +19,7 @@ struct InMemoryExternalExecutor : public Executor {
 
   static InMemoryExternalExecutor* current_executor;
 
-  InMemoryExternalExecutor(HarnessFunctionType func) {
+  InMemoryExternalExecutor(HarnessFunctionType func) : seq(4) {
     harness = func;
     shared_input = (uint8_t*)createAnonSharedMem(max_file_size);
   }
@@ -36,17 +36,18 @@ struct InMemoryExternalExecutor : public Executor {
   }
   
   void writeSharedExitType(ExitType exit_type) {
-    pipe2.write(&exit_type, sizeof(ExitType));
+    ;
   }
 
 protected:
   void runTargetAux(const Bytes& bytes) {
     ExitType status = ExitType::NORMAL;
     memcpy(shared_input, bytes.data(), bytes.size());
-    pipe1.write(&status, sizeof(ExitType));
-    pipe2.read(&status, sizeof(ExitType));
+    seq.wait(0);
+    seq.wait(3);
     if (status == ExitType::NORMAL)
       return;
+    child.wait();
     dumpCrashToFile(status, bytes);
     start();
   }
@@ -56,14 +57,14 @@ protected:
     installCrashHandlers(&fillSharedCrashReport);
     ExitType status = ExitType::NORMAL;
     while (true) {
-      pipe1.read(&status, sizeof(ExitType));
+      seq.wait(1);
       harness(shared_input, shared_input_size);
-      pipe2.write(&status, sizeof(ExitType));
+      seq.wait(2);
     }
   }
 
   Process child;
-  Pipe pipe1, pipe2;
+  SharedMemSequence seq;
   HarnessFunctionType harness;
   uint8_t* shared_input;
   size_t shared_input_size;
